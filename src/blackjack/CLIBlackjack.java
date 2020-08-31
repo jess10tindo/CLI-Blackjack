@@ -7,75 +7,37 @@ public class CLIBlackjack {
 	public static void main(String[] args) {
 		
 		String playAgain = "Y";
+		int totalWins = 0;
 		
 		while(playAgain.equals("Y")){
-		
-			//create deck as list of ints from 0-51 and print
-			int[] deck = new int[52];
-			//System.out.print("initial deck: " );  // just for printing initial deck
-			for(int i = 0; i < deck.length; i++) {
-				deck[i] = i;
-				//System.out.print(deck[i] + " "); // just for printing initial deck
-			}
-			//System.out.println();  // just for printing initial deck and spacing
+				
+			int[] deck = createDeck(52);
 			
+			shuffleDeck(deck);	
 			
-			// shuffle cards
-			for(int i = 0; i < deck.length; i++) {
-				int index = (int)(Math.random() * deck.length);
-				int temp = deck[i];
-				deck[i] = deck[index];
-				deck[index] = temp;
-			}
-			
-	//		// printing shuffled deck --- not needed for prompt, just for debugging
-	//		System.out.println();
-	//		System.out.print("shuffled deck: " );
-	//		for(int i = 0; i < deck.length; i++) {
-	//			System.out.print(deck[i] + " ");
-	//		}
-			
-			
-			//initializing  suit and rank arrays
 			String[] stringSuitArray = {"Spades", "Hearts", "Diamonds", "Clubs"};
-			String[] stringRankArray = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"};
+			String[] stringRankArray = {"Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
 			
-			
-			// Dealing dealer's hand and printing first card
-			System.out.println();
-			int cardIndex = 0; // initializing the card index that is being used to ensure each card is only used once
-	
-			System.out.println("Dealer's Hand: ");
-			String dealersFirstCard = (stringRankArray[deck[cardIndex] % 13] + " of " + stringSuitArray[deck[cardIndex] / 13]);
-			cardIndex++; // moving to next card in deck
-			String dealersSecondCard = (stringRankArray[deck[cardIndex] % 13] + " of " + stringSuitArray[deck[cardIndex] / 13]);
+			int cardIndex = 0;
+			System.out.println("Dealer's Hand:");
+			String dealersFirstCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);		
+			int dealerCardOneValue = getCardValue(deck, cardIndex);
 			cardIndex++;
-			System.out.println(dealersFirstCard);
-			//System.out.println(dealersSecondCard); // used only to verify later parts of code
-			System.out.println();
+			String dealersSecondCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+			int dealerCardTwoValue = getCardValue(deck, cardIndex);
+			cardIndex++;
+			int dealersTotal = dealerCardOneValue + dealerCardTwoValue;
+			System.out.println(dealersFirstCard + "\n");
 			
-			
-			// Dealing Player's Hand and printing both cards
+					
 			System.out.println("Your Hand: ");
-			String playersFirstCard = (stringRankArray[deck[cardIndex] % 13] + " of " + stringSuitArray[deck[cardIndex] / 13]);
+			String playersFirstCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+			int userCardOneValue = getCardValue(deck, cardIndex);
 			cardIndex++;
-			String playersSecondCard = (stringRankArray[deck[cardIndex] % 13] + " of " + stringSuitArray[deck[cardIndex] / 13]);
+			String playersSecondCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+			int userCardTwoValue = getCardValue(deck, cardIndex);
 			cardIndex++;
-			System.out.println(playersFirstCard + ", " + playersSecondCard);
-			System.out.println();
-			
-			
-			int userCardOneValue = ((deck[2] % 13)+1);
-			int userCardTwoValue = ((deck[3] % 13)+1);	
-			
-			if (userCardOneValue > 10) {
-				userCardOneValue = 10;
-			}
-			
-			if (userCardTwoValue > 10) {
-				userCardTwoValue = 10;
-			}
-			
+			System.out.println(playersFirstCard + ", " + playersSecondCard + "\n");				
 			int userTotal = userCardOneValue + userCardTwoValue;
 			
 			Scanner input = new Scanner(System.in);
@@ -85,18 +47,13 @@ public class CLIBlackjack {
 				String userInput = input.nextLine();
 				
 				do {
-					//System.out.println("Current total: " + userTotal);
 					if(userTotal <= 21 && userInput.equals("HIT")) {
-						String playersNewCard = (stringRankArray[deck[cardIndex] % 13] + " of " + stringSuitArray[deck[cardIndex] / 13]);
-						System.out.println("Your New card is: " + playersNewCard);
-						System.out.println();
-						int newUserCard = (deck[cardIndex] % 13) +1;
-						if(newUserCard > 10) {
-							newUserCard = 10;
-						}
-						userTotal+= newUserCard;
-						//System.out.println("What is being added: " + newUserCard);
-						//System.out.println("Your new total: "+ userTotal);
+						String playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+						System.out.println("Your New card is: " + playersNewCard + "\n");
+						int newUserCardValue = getCardValue(deck, cardIndex);
+					
+						userTotal+= newUserCardValue;
+						
 						cardIndex++;
 						if(userTotal < 21) {
 							System.out.println("Would you like to HIT or STAND? ");
@@ -104,10 +61,6 @@ public class CLIBlackjack {
 						}
 						else {
 						}
-						
-					}
-					else if (userTotal < 21 && userInput.equals("STAND")) {
-						System.out.println("You chose to STAND - let's see what happened with the dealer...");
 					}
 					
 					else {
@@ -115,82 +68,105 @@ public class CLIBlackjack {
 				}
 				while(userInput.equals("HIT") && userTotal < 21) ;	
 			}
-			
-			//system deals dealer additional cards if total is less than 17 and makes dealer lose if over 21
-		
-			int dealerCardOneValue = ((deck[0] % 13)+1);
-			int dealerCardTwoValue = ((deck[1] % 13)+1);
-			
-			// System.out.println("card 1 value: " + dealerCardOneValue); // only used for debugging
-			// System.out.println("card 2 value: " + dealerCardTwoValue); // only used for debugging
-			
-			int dealersTotal = dealerCardOneValue + dealerCardTwoValue;
-			
-			//System.out.println("Dealer's Total: " + dealersTotal); // only used for debugging
-			
+						
 			while(dealersTotal < 17) {
-				int newDealerCard = ((deck[cardIndex] % 13)+1); // takes value of next card in sequence
-				if (newDealerCard > 10) {
-					newDealerCard = 10;
-				}
-				//System.out.println("new card value: " + newDealerCard); // only used for debugging
-				dealersTotal += newDealerCard;
-				//System.out.println("new dealer card: " + (stringRankArray[deck[cardIndex] % 13] + " of " + stringSuitArray[deck[cardIndex] / 13]));
+				int newDealerCardValue = getCardValue(deck, cardIndex);
+				dealersTotal += newDealerCardValue;
 				cardIndex++;
 			}
-			
-			//System.out.println("Dealers new total: " + dealersTotal); // only used for debugging
-			
+						
 			System.out.println();
 			System.out.println("Result: ");
 			System.out.println("Dealer's Total: " + dealersTotal);
 			System.out.println("Your Total: " + userTotal);
+			System.out.println();
+
 			
-			if(dealersTotal > 21 && userTotal> 21) {
-				System.out.println("--------------");
-				System.out.println("No one wins");
+			String result = getResult(userTotal, dealersTotal);
+			System.out.println(result);
+			
+			if(result.equals("You win! :) ")) {
+				totalWins++;
 			}
 			
-			else if(dealersTotal > 21 && userTotal <= 21) {
-				System.out.println("--------------");
-				System.out.println("Dealer Busts. You Win! :)");
-			}
+			System.out.println("------------------------");	
+			System.out.println("Would you like to play again? (Y / N)");
+			playAgain = input.next();
 			
-			else if(dealersTotal == 21 && userTotal != 21) {
-				System.out.println("--------------");
-				System.out.println("Dealer got blackjack, you lose :(");
+			if(playAgain.equals("Y")) {
+				System.out.println("--------------------------------------------------------------");
+				System.out.println("               NEW GAME    (Total wins so far: " + totalWins + ")"
+						);
+				System.out.println("--------------------------------------------------------------");
 			}
-			
-			else if(dealersTotal == 21 && userTotal == 21) {
-				System.out.println("--------------");
-				System.out.println("You both got 21, but the dealer wins :(");
-			}
-			
-			else if (dealersTotal < 21) {
-				if(userTotal <  21 && userTotal > dealersTotal){
-					System.out.println("--------------");
-					System.out.println("You win! :)");
-				}
-				if(userTotal ==  21){
-					System.out.println("--------------");
-					System.out.println("Blackjack! You win! :)");
-				}
-				else if(userTotal < dealersTotal) {
-					System.out.println("--------------");
-					System.out.println("Sorry! Dealer wins");
-				}
-				else if(userTotal > 21) {
-					System.out.println("--------------");
-					System.out.println("You lose :(");
-				}
-			}
-			System.out.println("--------------");
-		System.out.println("Would you like to play again? (Y / N)");
-		playAgain = input.next();
-		}
 		
-		if(playAgain.equals("N")) {
-			System.out.println("Goodbye!");
+			if(playAgain.equals("N")) {
+				System.out.println("------------------------");
+				System.out.println("Thank you for playing - Goodbye!");
+			}
+		}	
+	}
+	
+	public static int[] createDeck(int numOfCards) {
+		int[] deck = new int[numOfCards];
+		for(int i = 0; i < deck.length; i++) {
+			deck[i] = i;
 		}
+		return deck;
+	}
+	
+	public static int[] shuffleDeck(int[] deck) {
+		
+		for(int i = 0; i < deck.length; i++) {
+			int index = (int)(Math.random() * deck.length);
+			int temp = deck[i];
+			deck[i] = deck[index];
+			deck[index] = temp;
+		}
+		return deck;
+	}
+	
+	public static int getCardValue(int[] deck, int cardIndex) {
+		int cardRank = ((deck[cardIndex] % 13)+1);
+		int cardValue = cardRank;
+		if(cardRank > 10) {
+			cardValue = 10; 
+		}
+		return cardValue;
+	}
+	
+	public static String getNextCard(int[] deck, String[] stringRankArray, String[] stringSuitArray, int cardIndex) {
+		String nextCard = (stringRankArray[deck[cardIndex] % 13] + " of " + stringSuitArray[deck[cardIndex] / 13]);
+		return nextCard;
+	}
+	
+	public static String getResult(int userTotal, int dealersTotal) {
+		String gameOutcome = null;
+		if(userTotal > 21) {
+			gameOutcome = ("You lose! :( ");
+		}
+		else if(dealersTotal > 21 && userTotal <= 21) {
+			gameOutcome = ("You win! :) ");
+		}
+		else if(dealersTotal == 21) {
+			gameOutcome = ("You lose! :( ");
+		}
+		else if (dealersTotal < 21) {
+			if(userTotal <  21 && userTotal > dealersTotal){
+				gameOutcome = ("You win! :) ");
+			}
+			if(userTotal ==  21){
+				gameOutcome = ("You win! :) ");
+			}
+			else if(userTotal < dealersTotal) {
+				gameOutcome = ("You lose! :( ");
+
+			}
+			else if(userTotal == dealersTotal) {
+				gameOutcome = ("You lose! :( ");
+			}
+		}
+		return gameOutcome;
 	}
 }
+	
