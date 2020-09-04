@@ -3,6 +3,8 @@ package blackjack;
 import java.util.*;
 
 public class CLIBlackjack {
+	
+	public enum Move {HIT, DOUBLE, STAND, SPLIT};
 
 	public static void main(String[] args) {
 		
@@ -33,42 +35,124 @@ public class CLIBlackjack {
 			System.out.println("Your Hand: ");
 			String playersFirstCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
 			int userCardOneValue = getCardValue(deck, cardIndex);
+			String userCardOneRank = getCardRank(deck, cardIndex, stringRankArray);
 			cardIndex++;
 			String playersSecondCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
 			int userCardTwoValue = getCardValue(deck, cardIndex);
+			String userCardTwoRank = getCardRank(deck, cardIndex, stringRankArray);
 			cardIndex++;
 			System.out.println(playersFirstCard + ", " + playersSecondCard + "\n");				
-			int userTotal = userCardOneValue + userCardTwoValue;
+			int handOneTotal = userCardOneValue + userCardTwoValue;
+			int handTwoTotal = 100;
 			
 			Scanner input = new Scanner(System.in);
+			String playersNewCard;
+			String userInput = null;
+			Move move = null;		
 			
-			if(userTotal<21) {
-				System.out.println("Would you like to HIT or STAND? ");
-				String userInput = input.nextLine();
-				
-				do {
-					if(userTotal <= 21 && userInput.equals("HIT")) {
-						String playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
-						System.out.println("Your New card is: " + playersNewCard + "\n");
-						int newUserCardValue = getCardValue(deck, cardIndex);
-					
-						userTotal+= newUserCardValue;
-						
-						cardIndex++;
-						if(userTotal < 21) {
-							System.out.println("Would you like to HIT or STAND? ");
-							userInput = input.nextLine();
-						}
-						else {
-						}
-					}
-					
-					else {
-					}	
+			do {
+				System.out.print("What would you like to do?  ");
+				System.out.print("HIT, DOUBLE, STAND");
+				if(userCardOneRank.equals(userCardTwoRank)) {
+					System.out.print(", SPLIT");
 				}
-				while(userInput.equals("HIT") && userTotal < 21) ;	
-			}
+				System.out.println();
+				userInput = input.nextLine();
+				move = getUserMove(userInput);
+				
+				if(move == Move.HIT || move == Move.DOUBLE) {
+					playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+					System.out.println("Your New card is: " + playersNewCard + "\n");
+					int newUserCardValue = getCardValue(deck, cardIndex);
+					cardIndex++;
+					handOneTotal+= newUserCardValue;
+					move = null;
+				}
+				
+				else if (move == Move.STAND) {
+					// do nothing just continue to result
+				}
+				
+				else if (move == Move.SPLIT) {
+					if(!userCardOneRank.equals(userCardTwoRank)) {
+						System.out.println("You cannot split if your cards are not of equal rank");
+						move = null;
+					}
+					else {
+						// Do all the splitting stuff
+						System.out.println("You have split your hand");
 						
+						System.out.print("\nYour first hand is: ");
+						playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+						System.out.println(playersFirstCard + ", " + playersNewCard);
+						handOneTotal = getCardValue(deck, cardIndex) + userCardOneValue;
+						cardIndex++;
+						
+						System.out.print("Your second hand is: ");
+						playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+						System.out.println(playersSecondCard + ", " + playersNewCard);
+						handTwoTotal = getCardValue(deck, cardIndex) + userCardTwoValue;
+						cardIndex++;
+						
+						do {
+							System.out.print("\nWhat would you like to do for your first hand?  ");
+							System.out.println("HIT, DOUBLE, STAND");
+							userInput = input.nextLine();
+							move = getUserMove(userInput);
+							
+							if(move == Move.HIT || move == Move.DOUBLE) {
+								playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+								System.out.println("Your New card is: " + playersNewCard + "\n");
+								int newUserCardValue = getCardValue(deck, cardIndex);
+								cardIndex++;
+								handOneTotal+= newUserCardValue;
+								move = null;
+							}
+							
+							else if (move == Move.STAND) {
+								// do nothing just continue to result
+							}
+							else {
+								System.out.println("You did not enter a valid move.");
+								move = null;
+							}
+						}
+						while(move == null && handOneTotal < 21);
+					
+						do {
+							System.out.print("\nWhat would you like to do for your second hand?  ");
+							System.out.println("HIT, DOUBLE, STAND");
+							userInput = input.nextLine();
+							move = getUserMove(userInput);
+							
+							if(move == Move.HIT || move == Move.DOUBLE) {
+								playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
+								System.out.println("Your New card is: " + playersNewCard + "\n");
+								int newUserCardValue = getCardValue(deck, cardIndex);
+								cardIndex++;
+								handTwoTotal+= newUserCardValue;
+								move = null;
+							}
+							
+							else if (move == Move.STAND) {
+								// do nothing just continue to result
+							}
+							else {
+								System.out.println("You did not enter a valid move.");
+								move = null;
+							}
+						}
+						while(move == null && handTwoTotal < 21);
+					}
+				}
+				
+				else {
+					System.out.println("You did not enter a valid move.");
+					move = null;
+				}
+			}
+			while(move == null && handOneTotal < 21);
+				
 			while(dealersTotal < 17) {
 				int newDealerCardValue = getCardValue(deck, cardIndex);
 				dealersTotal += newDealerCardValue;
@@ -78,16 +162,15 @@ public class CLIBlackjack {
 			System.out.println();
 			System.out.println("Result: ");
 			System.out.println("Dealer's Total: " + dealersTotal);
-			System.out.println("Your Total: " + userTotal);
+			System.out.println("Hand One Total: " + handOneTotal);
+			if(handTwoTotal!=100) {
+				System.out.println("Hand Two Total: " + handTwoTotal);
+			}
 			System.out.println();
 
 			
-			String result = getResult(userTotal, dealersTotal);
+			String result = getResult(handOneTotal, handTwoTotal, dealersTotal);
 			System.out.println(result);
-			
-			if(result.equals("You win! :) ")) {
-				totalWins++;
-			}
 			
 			System.out.println("------------------------");	
 			System.out.println("Would you like to play again? (Y / N)");
@@ -95,8 +178,7 @@ public class CLIBlackjack {
 			
 			if(playAgain.equals("Y")) {
 				System.out.println("--------------------------------------------------------------");
-				System.out.println("               NEW GAME    (Total wins so far: " + totalWins + ")"
-						);
+				System.out.println("               NEW GAME                                      ");
 				System.out.println("--------------------------------------------------------------");
 			}
 		
@@ -104,7 +186,8 @@ public class CLIBlackjack {
 				System.out.println("------------------------");
 				System.out.println("Thank you for playing - Goodbye!");
 			}
-		}	
+		}
+		
 	}
 	
 	public static int[] createDeck(int numOfCards) {
@@ -126,6 +209,11 @@ public class CLIBlackjack {
 		return deck;
 	}
 	
+	public static String getCardRank(int[] deck, int cardIndex, String[] stringRankArray) {
+		String cardRank =  (stringRankArray[deck[cardIndex] % 13]);
+		return cardRank;
+	}
+	
 	public static int getCardValue(int[] deck, int cardIndex) {
 		int cardRank = ((deck[cardIndex] % 13)+1);
 		int cardValue = cardRank;
@@ -140,33 +228,112 @@ public class CLIBlackjack {
 		return nextCard;
 	}
 	
-	public static String getResult(int userTotal, int dealersTotal) {
+	public static String getResult(int handOneTotal, int handTwoTotal, int dealersTotal) {
 		String gameOutcome = null;
-		if(userTotal > 21) {
-			gameOutcome = ("You lose! :( ");
-		}
-		else if(dealersTotal > 21 && userTotal <= 21) {
-			gameOutcome = ("You win! :) ");
-		}
-		else if(dealersTotal == 21) {
-			gameOutcome = ("You lose! :( ");
-		}
-		else if (dealersTotal < 21) {
-			if(userTotal <  21 && userTotal > dealersTotal){
-				gameOutcome = ("You win! :) ");
+		String handOneOutcome = null;
+		String handTwoOutcome = null;
+		
+		if (handTwoTotal == 100) {
+			if(handOneTotal > 21) {
+				gameOutcome = "BUST :( You lose!";
 			}
-			if(userTotal ==  21){
-				gameOutcome = ("You win! :) ");
+			else if(dealersTotal > 21 && handOneTotal <= 21) {
+				gameOutcome = "Dealer Busts :) You win!";
 			}
-			else if(userTotal < dealersTotal) {
-				gameOutcome = ("You lose! :( ");
+			else if(dealersTotal == 21) {
+				gameOutcome = "Dealer got blackjack :( You lose!";
+			}
+			else if (dealersTotal < 21) {
+				if(handOneTotal <  21 && handOneTotal > dealersTotal){
+					gameOutcome = "You beat the dealer :) You win!";
+				}
+				if(handOneTotal ==  21){
+					gameOutcome = "You got blackjack :) You win!";
+				}
+				else if(handOneTotal < dealersTotal) {
+					gameOutcome = "Dealer beat you :( You lose!";
 
-			}
-			else if(userTotal == dealersTotal) {
-				gameOutcome = ("You lose! :( ");
-			}
+				}
+				else if(handOneTotal == dealersTotal) {
+					gameOutcome = "Dealer wins a draw :( You lose!";
+				}
+			}	
 		}
+		else {
+			if(handOneTotal > 21) {
+				handOneOutcome = "BUST :( You lose!";
+			}
+			else if(dealersTotal > 21 && handOneTotal <= 21) {
+				handOneOutcome = "Dealer Busts :) You win!";
+			}
+			else if(dealersTotal == 21) {
+				handOneOutcome = "Dealer got blackjack :( You lose!";
+			}
+			else if (dealersTotal < 21) {
+				if(handOneTotal <  21 && handOneTotal > dealersTotal){
+					handOneOutcome = "You beat the dealer :) You win!";
+				}
+				if(handOneTotal ==  21){
+					handOneOutcome = "You got blackjack :) You win!";
+				}
+				else if(handOneTotal < dealersTotal) {
+					handOneOutcome = "Dealer beat you :( You lose!";
+
+				}
+				else if(handOneTotal == dealersTotal) {
+					handOneOutcome = "Dealer wins a draw :( You lose!";
+				}
+			}	
+			
+			if(handTwoTotal > 21) {
+				handTwoOutcome = "BUST :( You lose!";
+			}
+			else if(dealersTotal > 21 && handTwoTotal <= 21) {
+				handTwoOutcome = "Dealer Busts :) You win!";
+			}
+			else if(dealersTotal == 21) {
+				handTwoOutcome = "Dealer got blackjack :( You lose!";
+			}
+			else if (dealersTotal < 21) {
+				if(handTwoTotal <  21 && handTwoTotal > dealersTotal){
+					handTwoOutcome = "You beat the dealer :) You win!";
+				}
+				if(handTwoTotal ==  21){
+					handTwoOutcome = "You got blackjack :) You win!";
+				}
+				else if(handTwoTotal < dealersTotal) {
+					handTwoOutcome = "Dealer beat you :( You lose!";
+
+				}
+				else if(handTwoTotal == dealersTotal) {
+					handTwoOutcome = "Dealer wins a draw :( You lose!";
+				}
+			}
+			gameOutcome = "Hand One: " + handOneOutcome + "\nHand Two: " + handTwoOutcome;
+		}
+		
 		return gameOutcome;
+	}
+	
+	public static Move getUserMove(String userInput) {
+		Move move;
+		switch(userInput) {
+		case "HIT":
+			move = Move.HIT;
+			break;
+		case "STAND":
+			move = Move.STAND;
+			break;
+		case "DOUBLE":
+			move = Move.DOUBLE;
+			break;
+		case "SPLIT":
+			move = Move.SPLIT;
+			break;
+		default:
+			move = null;
+		}
+		return move;
 	}
 }
 	
