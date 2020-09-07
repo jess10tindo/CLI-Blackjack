@@ -97,8 +97,22 @@ public class CLIBlackjack {
 						do {
 							System.out.print("\nWhat would you like to do for your first hand?  ");
 							System.out.println("HIT, DOUBLE, STAND");
-							userInput = input.nextLine();
-							move = getUserMove(userInput);
+							
+							move = getUserMove(userInput); 
+						
+							try
+						        {
+								userInput = input.nextLine();
+						           if (!"hit".equals(userInput)) {
+						                throw new Exception("Invalid input, Please make sure all letters are upper acse");
+						            }           
+						        }
+						        catch (Exception exe)
+						        {   
+						            System.out.println(exe);
+						            return;
+						        }
+							
 							
 							if(move == Move.HIT || move == Move.DOUBLE) {
 								playersNewCard = getNextCard(deck, stringRankArray, stringSuitArray, cardIndex);
@@ -113,7 +127,7 @@ public class CLIBlackjack {
 								// do nothing just continue to result
 							}
 							else {
-								System.out.println("You did not enter a valid move.");
+								System.out.println("You did not enter a valid move. Please make sure all letters are upper acse");
 								move = null;
 							}
 						}
@@ -138,7 +152,7 @@ public class CLIBlackjack {
 								// do nothing just continue to result
 							}
 							else {
-								System.out.println("You did not enter a valid move.");
+								System.out.println("You did not enter a valid move. Please make sure all letters are upper acse");
 								move = null;
 							}
 						}
@@ -147,7 +161,7 @@ public class CLIBlackjack {
 				}
 				
 				else {
-					System.out.println("You did not enter a valid move.");
+					System.out.println("You did not enter a valid move. Please make sure all letters are upper acse");
 					move = null;
 				}
 			}
