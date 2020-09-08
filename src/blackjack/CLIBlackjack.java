@@ -9,7 +9,6 @@ public class CLIBlackjack {
 	public static void main(String[] args) {
 		
 		String playAgain = "Y";
-		int totalWins = 0;
 		
 		while(playAgain.equals("Y")){
 				
@@ -175,6 +174,7 @@ public class CLIBlackjack {
 			System.out.println("------------------------");	
 			System.out.println("Would you like to play again? (Y / N)");
 			playAgain = input.next();
+			playAgain = playAgain.toUpperCase();
 			
 			if(playAgain.equals("Y")) {
 				System.out.println("--------------------------------------------------------------");
@@ -317,6 +317,7 @@ public class CLIBlackjack {
 	
 	public static Move getUserMove(String userInput) {
 		Move move;
+		userInput = userInput.toUpperCase();
 		switch(userInput) {
 		case "HIT":
 			move = Move.HIT;
@@ -336,4 +337,7 @@ public class CLIBlackjack {
 		return move;
 	}
 }
+
+
+	
 	
