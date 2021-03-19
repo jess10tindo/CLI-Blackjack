@@ -1,4 +1,3 @@
-<h2>Part One</h2>
 <h3>Features</h3>
 <ul>
   <li>The system should store the deck as a list of ints from 0-51</li>
